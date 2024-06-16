@@ -1,4 +1,3 @@
-// Library for SSD1306 OLED Display
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,20 +11,29 @@
 #include "freertos/event_groups.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
-
-#include "ssd1306.h"  // Your SSD1306 header
+#include "ssd1306.h" 
 
 #define WIFI_CONNECTED_BIT BIT0
-#define WEATHER_API_URL "http://api.openweathermap.org/data/2.5/weather?lat=40.44&lon=-79.99&appid=41a7528f55243a115e6dcdd9dc8cd093&units=metric"
+//change the API key to your own 
+//if you don't have one, register on OpenWeatherMap and you can get it for free!
+#define API_KEY "41a7528f55243a115e6dcdd9dc8cd093"
+//change the latitude and longitude to your desired location
+#define LATITUDE "40.44"
+#define LONGITUDE "-79.99"
+#define WEATHER_API_URL "http://api.openweathermap.org/data/2.5/weather?lat=" LATITUDE "&lon=" LONGITUDE "&appid=" API_KEY "& units=metric"
+#define SSID "WhiteSky-Centre"
+#define PASSWORD "w224ap2k"
 
-static const char *TAG_WIFI = "wifi station";  // Unique TAG for Wi-Fi
-static const char *TAG_WEATHER = "weather_fetch";  // Unique TAG for weather fetch
-static const char *tag = "oled_display";  // Unique TAG for OLED display
-EventGroupHandle_t s_wifi_event_group;  // Define it here
+static const char *TAG_WIFI = "wifi station";  // TAG for Wi-Fi
+static const char *TAG_WEATHER = "weather_fetch";  // TAG for weather fetch
+static const char *TAG_OLED = "oled_display";  // TAG for OLED display
+
+EventGroupHandle_t s_wifi_event_group;  
 char *response_data = NULL;
 size_t response_len = 0;
 bool all_chunks_received = false;
 
+// Event handler for Wi-Fi and IP events
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
@@ -41,6 +49,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
+// Initialize Wi-Fi with the given SSID and password
 void wifi_init_sta(const char *ssid, const char *password) {
     s_wifi_event_group = xEventGroupCreate();
 
@@ -68,11 +77,9 @@ void wifi_init_sta(const char *ssid, const char *password) {
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
     esp_wifi_start();
-
-    ESP_LOGI(TAG_WIFI, "wifi_init_sta finished.");
-
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
+    //log debug message based on the connection status
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG_WIFI, "Connected to AP");
     } else {
@@ -80,6 +87,7 @@ void wifi_init_sta(const char *ssid, const char *password) {
     }
 }
 
+// Event handler for HTTP events
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     switch (evt->event_id) {
@@ -99,6 +107,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
+// Parse JSON data to get weather data
 void get_weather_data(const char *json_string, double *temp_min, double *temp_max, char *city_name, char *weather_description)
 {
     cJSON *root = cJSON_Parse(json_string);
@@ -166,13 +175,14 @@ void fetch_weather_data(void *pvParameters)
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
     esp_err_t err = esp_http_client_perform(client);
+    // Initialize OLED
     SSD1306_t dev;
 
 #if CONFIG_I2C_INTERFACE
-	ESP_LOGI(tag, "INTERFACE is i2c");
-	ESP_LOGI(tag, "CONFIG_SDA_GPIO=%d",CONFIG_SDA_GPIO);
-	ESP_LOGI(tag, "CONFIG_SCL_GPIO=%d",CONFIG_SCL_GPIO);
-	ESP_LOGI(tag, "CONFIG_RESET_GPIO=%d",CONFIG_RESET_GPIO);
+	ESP_LOGI(TAG_OLED, "INTERFACE is i2c");
+	ESP_LOGI(TAG_OLED, "CONFIG_SDA_GPIO=%d",CONFIG_SDA_GPIO);
+	ESP_LOGI(TAG_OLED, "CONFIG_SCL_GPIO=%d",CONFIG_SCL_GPIO);
+	ESP_LOGI(TAG_OLED, "CONFIG_RESET_GPIO=%d",CONFIG_RESET_GPIO);
 	i2c_master_init(&dev, CONFIG_SDA_GPIO, CONFIG_SCL_GPIO, CONFIG_RESET_GPIO);
 #endif // CONFIG_I2C_INTERFACE
 
@@ -192,9 +202,7 @@ void fetch_weather_data(void *pvParameters)
             ESP_LOGI(TAG_WEATHER, "City: %s, Weather: %s, Min Temp: %.1fC, Max Temp: %.1fC", city_name, weather_description, temp_min, temp_max);
             free(response_data);
 
-            // Display on OLED
-            SSD1306_t dev;
-            ssd1306_init(&dev, 128, 64);  // Adjust as needed
+            ssd1306_init(&dev, 128, 64);
             char temp_min_str[30];
             char temp_max_str[30];
             sprintf(temp_min_str, "Min Temp: %.1fC", temp_min);
@@ -211,12 +219,14 @@ void fetch_weather_data(void *pvParameters)
     } else {
         ESP_LOGE(TAG_WEATHER, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
-
     esp_http_client_cleanup(client);
     vTaskDelete(NULL);
 }
+
+
 void app_main(void)
 {
+    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -224,7 +234,8 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    wifi_init_sta("WhiteSky-Centre", "w224ap2k");
+    //wifi initialization
+    wifi_init_sta(SSID, PASSWORD);
 
     // Wait for Wi-Fi connection
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdTRUE, portMAX_DELAY);

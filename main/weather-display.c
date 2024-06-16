@@ -18,11 +18,11 @@
 //if you don't have one, register on OpenWeatherMap and you can get it for free!
 #define API_KEY "41a7528f55243a115e6dcdd9dc8cd093"
 //change the latitude and longitude to your desired location
-#define LATITUDE "40.44"
-#define LONGITUDE "-79.99"
-#define WEATHER_API_URL "http://api.openweathermap.org/data/2.5/weather?lat=" LATITUDE "&lon=" LONGITUDE "&appid=" API_KEY "& units=metric"
+#define LATITUDE "39.90"
+#define LONGITUDE "116.40"
 #define SSID "WhiteSky-Centre"
 #define PASSWORD "w224ap2k"
+
 
 static const char *TAG_WIFI = "wifi station";  // TAG for Wi-Fi
 static const char *TAG_WEATHER = "weather_fetch";  // TAG for weather fetch
@@ -167,6 +167,9 @@ void get_weather_data(const char *json_string, double *temp_min, double *temp_ma
 
 void fetch_weather_data(void *pvParameters)
 {
+    char WEATHER_API_URL[256];
+    sprintf(WEATHER_API_URL, "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=metric", LATITUDE, LONGITUDE, API_KEY);
+    
     esp_http_client_config_t config = {
         .url = WEATHER_API_URL,
         .method = HTTP_METHOD_GET,
@@ -202,7 +205,9 @@ void fetch_weather_data(void *pvParameters)
             ESP_LOGI(TAG_WEATHER, "City: %s, Weather: %s, Min Temp: %.1fC, Max Temp: %.1fC", city_name, weather_description, temp_min, temp_max);
             free(response_data);
 
-            ssd1306_init(&dev, 128, 64);
+            // Display on OLED
+            SSD1306_t dev;
+            ssd1306_init(&dev, 128, 64);  // Adjust as needed
             char temp_min_str[30];
             char temp_max_str[30];
             sprintf(temp_min_str, "Min Temp: %.1fC", temp_min);
@@ -219,14 +224,12 @@ void fetch_weather_data(void *pvParameters)
     } else {
         ESP_LOGE(TAG_WEATHER, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
+
     esp_http_client_cleanup(client);
     vTaskDelete(NULL);
 }
-
-
 void app_main(void)
 {
-    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -234,7 +237,6 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    //wifi initialization
     wifi_init_sta(SSID, PASSWORD);
 
     // Wait for Wi-Fi connection

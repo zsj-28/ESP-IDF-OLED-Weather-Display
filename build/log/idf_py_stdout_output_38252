@@ -1,0 +1,82 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\Espressif\frameworks\esp-idf-v5.2.1\weather-display\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.2_py3.11_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.2.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Espressif/frameworks/esp-idf-v5.2.1/weather-display/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6860 bytes. 0x7a0 bytes (7%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/weather-display.c.obj
+[3/8] Linking C static library esp-idf\main\libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable weather-display.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.7.0
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+Generated C:/Espressif/frameworks/esp-idf-v5.2.1/weather-display/build/weather-display.bin
+[7/8] cmd.exe /C "cd /D C:\Espressif\frameworks\esp-idf-v5.2.1\weather-display\build\esp-idf\esptool_py && C:\Espressif\python_env\idf5.2_py3.11_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.2.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/Espressif/frameworks/esp-idf-v5.2.1/weather-display/build/partition_table/partition-table.bin C:/Espressif/frameworks/esp-idf-v5.2.1/weather-display/build/weather-display.bin"
+weather-display.bin binary size 0xdaac0 bytes. Smallest app partition is 0x100000 bytes. 0x25540 bytes (15%) free.
+[7/8] cmd.exe /C "cd /D C:\Espressif\frameworks\esp-idf-v5.2.1\components\esptool_py && C:\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/Espressif/frameworks/esp-idf-v5.2.1 -D SERIAL_TOOL=C:/Espressif/python_env/idf5.2_py3.11_env/Scripts/python.exe;;C:/Espressif/frameworks/esp-idf-v5.2.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/Espressif/frameworks/esp-idf-v5.2.1/weather-diesptool.py --chip esp32 -p COM6 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 weather-display.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.7.0
+Serial port COM6
+Connecting....
+Chip is ESP32-D0WD-V3 (revision v3.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: 94:e6:86:48:63:ec
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000eafff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26720 bytes to 16363...
+Writing at 0x00001000... (100 %)
+Wrote 26720 bytes (16363 compressed) at 0x00001000 in 0.9 seconds (effective 231.3 kbit/s)...
+Hash of data verified.
+Compressed 895680 bytes to 560475...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001cc0c... (5 %)
+Writing at 0x00026f49... (8 %)
+Writing at 0x0002c589... (11 %)
+Writing at 0x000339b0... (14 %)
+Writing at 0x0003ddb6... (17 %)
+Writing at 0x00043760... (20 %)
+Writing at 0x000493a6... (22 %)
+Writing at 0x0004f083... (25 %)
+Writing at 0x00054e10... (28 %)
+Writing at 0x0005a9df... (31 %)
+Writing at 0x0005fcee... (34 %)
+Writing at 0x0006511b... (37 %)
+Writing at 0x0006a626... (40 %)
+Writing at 0x0006f9d6... (42 %)
+Writing at 0x0007501a... (45 %)
+Writing at 0x0007a90b... (48 %)
+Writing at 0x00080939... (51 %)
+Writing at 0x000863fd... (54 %)
+Writing at 0x0008c001... (57 %)
+Writing at 0x00091c35... (60 %)
+Writing at 0x00097642... (62 %)
+Writing at 0x0009cfc8... (65 %)
+Writing at 0x000a2d3b... (68 %)
+Writing at 0x000a931b... (71 %)
+Writing at 0x000aee3f... (74 %)
+Writing at 0x000b5547... (77 %)
+Writing at 0x000bb0bb... (80 %)
+Writing at 0x000c092f... (82 %)
+Writing at 0x000c7c83... (85 %)
+Writing at 0x000d211b... (88 %)
+Writing at 0x000d835b... (91 %)
+Writing at 0x000ddf06... (94 %)
+Writing at 0x000e41a9... (97 %)
+Writing at 0x000e9466... (100 %)
+Wrote 895680 bytes (560475 compressed) at 0x00010000 in 14.1 seconds (effective 506.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 236.5 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+splay/build -P C:/Espressif/frameworks/esp-idf-v5.2.1/components/esptool_py/run_serial_tool.cmake"
